@@ -30,6 +30,10 @@ Once you have done that, go ahead and create access keys for the admin account f
 
 ### Local Tools
 
+Note: You need to have the same version of kubectl on both client and server or things don't work nicely. You can download the version I used [here](https://github.com/kubernetes/kubernetes/releases/download/v1.6.2/kubernetes.tar.gz) while the download page is [here](https://github.com/kubernetes/kubernetes/releases?after=v1.5.7).
+
+After you deploy you can run `kubectl version` to find out what version `kops` has deployed. Not sure how to ask `kops` before deployment.
+
 #### aws tool
 
 This install commands assume you have `brew` installed. If not go ahead and go to their website for install instructions. 
@@ -40,7 +44,7 @@ To install aws you can use `pip` if you are not on a mac, otherwise just use `br
 brew install awscli
 ```
 
-The version this project tested with is: `aws-cli/1.11.13 Python/2.7.10 Darwin/16.5.0 botocore/1.4.70`
+The version this project tested with is: `aws-cli/1.11.89 Python/2.7.10 Darwin/16.5.0 botocore/1.5.52`
 
 To configure it with your credentials run:
 
@@ -55,17 +59,7 @@ Please see the online docs: [kubectl install instructinos](https://kubernetes.io
 The version that this project tested with is: 
 
 ```
-{
-	Major:"1", 
-	Minor:"5", 
-	GitVersion:"v1.5.4", 
-	GitCommit:"7243c69eb523aa4377bce883e7c0dd76b84709a1", 
-	GitTreeState:"clean", 
-	BuildDate:"2017-03-08T02:50:34Z", 
-	GoVersion:"go1.8", 
-	Compiler:"gc", 
-	Platform:"darwin/amd64"
-}
+Client Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.4", GitCommit:"d6f433224538d4f9ca2f7ae19b252e6fcb66a3ae", GitTreeState:"clean", BuildDate:"2017-05-19T20:41:24Z", GoVersion:"go1.8.1", Compiler:"gc", Platform:"darwin/amd64"}
 ```
 
 #### kops tool
@@ -78,7 +72,28 @@ Next you need to install `kops`, either by downloading a release or running
 brew install kops
 ```
 
-The version this project was tested with is: `Version 1.5.3`
+The version this project was tested with is: `Version 1.6.0`
+
+#### jp
+
+I used `jp` version 0.1.1
+
+It is a way to filter json objects that I think is superior to `jq`, but I did not know about it at the start of the project. So unfortunately I use both... 
+
+```
+brew tap jmespath/jmespath
+brew install jp
+```
+
+#### jq
+
+I used `jq` version-1.5
+
+```
+brew install jq
+```
+
+If I get time I would replace this with jp.
 
 ### Domain on AWS
 
@@ -158,6 +173,26 @@ Then may mean your cluster is not yet setup and you just need to wait or everyth
 
 These tend to be a lot more predictable. Either they work flawlessly or throw sometimes useful errors. As such I have put them in Makefiles to speed up deployment and reversals. I will go into detail about how each one works, but at the start of each section I have a summary of just the commands you need to run to deploy that part.
 
+I created a make file to illustrate the parts, but the problem is some of the commands take time after they have completed to finish the operation on the k8 cluster. Makefiles are really poor man's automation tool. So I have used the Makefile where appropriate, but you don't get to just run `make`. Out of scope of this project, but I need to find a better build tool.
+
+Each of these sections should be done in order. You need to deploy the ingress (Default-backend service and Nginx/Warp) first, then comes postgresql, then sqitch and finally the PostgREST service.
+
+## K8 dashboard
+
+To check if it is installed run:
+
+```
+kubectl get pods --all-namespaces | grep dashboard
+```
+
+If not run:
+
+```
+kubectl create -f https://git.io/kube-dashboard
+```
+
+Note: in the version of `kpos` I use you have to create the dashboard manually.
+
 ## Default-backend service and Nginx/Warp
 
 This is the service that handles load-balancing and internal routing. It creates the Elastic Load Balancer which all traffic goes through. This is important since that load balancer handles the certificates. Plus this also has the default backend which is part of the internal routing.
@@ -196,14 +231,56 @@ make clean
 
 ## Postgresql
 
+This uses the `helm` tool to deploy a postgresql cluster on the k8 cluster. So you need to install [helm from here](https://helm.sh/). 
+
+I am on version:
+
+```
+Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
+```
+
+Essentially `helm` is taking in the values.yaml in the k8/postgresql repo to make the postgresql cluster. The password is generated for us and the other make files use `kubectl` to get it for you.
+
 ### Summary of deployment commands
 
+In the k8/postgresql folder run, after you have sourced your env file:
+
+```
+make setup
+```
+
+followed by
+
+```
+make
+```
+
 ## PostgREST
+
+This one has a few pain points. The reason I started using environment variables in the first place was so I could deploy different versions of PostgREST, but the result is quite clumsy. If you want to deploy say `v1` you set the `DBSCHEMA` environment variable to 'v1'. When you run `make` in the k8/PostgREST folder it will create a new deployment, service, ingress and url to access a PostgREST instance that access the schema v1. If you want to remove that version you run `make clean` and its all removed for you, but if you want to remove say version `v2` you have to switch the environment variable to `v2` before you can remove it.
+
+This is a problem with this since `make clean` is only going to remove the version with the corresponding `DBSCHEMA`. In reality I need to have a configuration file for each version that is handled separately. I think `helm` may be able to fill that role, but that is beyond the scope of this project.
+
+There is another part to keep in mind: all instances use the same `JWT_SECRET`, `DBURI` connection and the anonymous role is hard coded to be anon concatenated with `DBSCHEMA`. So you have to make sure in the sqitch files that the authenticator role can switch to each anonymous role, that each role gets access to the group types for each version (in fact when creating a new version you need to grant all existing roles with any new group types that they should be a part of) and make sure the anonymous role follows the pattern anonDBSCHEMA (example anonv1). Of course the only parts that the PostgREST instance can see are whatever is in the schema `DBSCHEMA`.
 
 Note: the `AWS_HOST_ID` env uses `DOMAINNAME` to figure out which of the `hostedZones` is the right one. Just make sure the `DOMAINNAME` is only the domain. For example: gasworktesting **NOT** gasworktesting.com
 
 Note: The `ELB` env variable is filled with the first elastic load balancer it finds. I might be able to do something where I ask k8 what vpc the cluster is in and use that to filter the results, but for now just keep this is mind.
 
 ### Summary of deployment commands
+
+To deploy version 1, set DBSCHEMA to `v1` in your env script and run:
+
+```
+make
+```
+
+To remove run:
+
+```
+make clean
+```
+
+To access go to [here](v1postgrest.gasworktesting.com) and you will get the swagger spec.
 
 ## Swagger-UI
