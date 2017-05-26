@@ -1,4 +1,20 @@
-# Structure of this document
+---
+title: Instructions on how to deploy entire setup
+author: Pfalzgraf
+date: 
+toc:
+geometry: margin=1in
+---
+
+# General Structure
+
+I first walk you through creating the kops cluster and then setting up the prerequisites the API. Then I go through putting the demo API online and end with my notes on how to setup GitLab (if you didn't make the PostgREST image on your own computer).
+
+I pulled the monitoring from the project, it just never really gave me back reliable numbers (because of some config issues I had). I would really need another week to get that working properly, so I cut it out.
+
+Notes to future me: helm for deploying heapster (for auto scaling) kept having strange issues. Try deploying it manually next time.
+
+Also, you need to change the secretes in the env file, this whole project is being saved online.
 
 # Global Environment Variables
 
@@ -59,7 +75,18 @@ Please see the online docs: [kubectl install instructinos](https://kubernetes.io
 The version that this project tested with is: 
 
 ```
-Client Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.4", GitCommit:"d6f433224538d4f9ca2f7ae19b252e6fcb66a3ae", GitTreeState:"clean", BuildDate:"2017-05-19T20:41:24Z", GoVersion:"go1.8.1", Compiler:"gc", Platform:"darwin/amd64"}
+Client Version: version.Info
+{
+  Major:"1", 
+  Minor:"6", 
+  GitVersion:"v1.6.4", 
+  GitCommit:"d6f433224538d4f9ca2f7ae19b252e6fcb66a3ae", 
+  GitTreeState:"clean", 
+  BuildDate:"2017-05-19T20:41:24Z", 
+  GoVersion:"go1.8.1", 
+  Compiler:"gc", 
+  Platform:"darwin/amd64"
+}
 ```
 
 #### kops tool
@@ -140,7 +167,8 @@ kops create cluster \
 You might get this kind of error:
 
 ```
-error determining default DNS zone: No matching hosted zones found for "<your url>"; please create one (e.g. "<your url>") first
+error determining default DNS zone: No matching hosted zones found for "<your url>"; 
+please create one (e.g. "<your url>") first
 ```
 
 I have no idea why this happens, but if you deploy the cluster again, a few times, it just works.
@@ -164,10 +192,17 @@ kops validate cluster $NAME
 That command outputs a few others that you can try. However, you need to wait quite awhile before they will tell you the cluster works. For me it took about 20min before the cluster was ready to respond. So if it does not work, just wait. For example if you see:
 
 ```
-cannot get nodes for "<your url>": Get https://api.<your url>/api/v1/nodes: dial tcp <some ip>:443: i/o timeout
+cannot get nodes for "<your url>": 
+Get https://api.<your url>/api/v1/nodes: dial tcp <some ip>:443: i/o timeout
 ```
 
 Then may mean your cluster is not yet setup and you just need to wait or everything is broken and you will have no idea why.
+
+## Docker repository 
+
+You need to have some repository for k8 to pull off of. I set one up on AWS in ap-southeast-2, since my cluster is there. Once you have set the `DOCKER_REPO` environment variable to the base URI.
+
+The Makefiles assumes that there is a swagger-ui and postgrest repository under the base URI.
 
 # Deploying services on k8
 
@@ -209,9 +244,13 @@ Note: find out if when you send a request with a password over HTTP, does the re
 
 Note: The traffic between the ELB and the rest of the cluster should be in HTTP, I think I have taken the necessary precautions, but I should ask about it when I get the chance.
 
+Note: The reason why there is a Dockerfile in that repo is so that I could modify the nginx to add the required CORS headers, but I was not successful. There is a program on the nginx-ingress-controller image that creates the nginx.conf when an ingress rule is created in k8. I would need to figure out how that works to actually add in the needed headers. The nginx.conf file in the repo has the headers I think swagger-ui wants. 
+
 ### Setup
 
-You have to lookup the arn in the AWS Certificate Manager online, ![example](aws-cert-manager-console.png).
+You have to lookup the arn in the AWS Certificate Manager online:
+
+![example](aws-cert-manager-console.png).
 
 Once you get to the place in the image above click on your cert and in the drop down you will see the ARN. Put that into your `env` file as `SSL_CERT_ARN`.
 
@@ -236,7 +275,12 @@ This uses the `helm` tool to deploy a postgresql cluster on the k8 cluster. So y
 I am on version:
 
 ```
-Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
+Client: &version.Version 
+{
+  SemVer:"v2.4.2", 
+  GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", 
+  GitTreeState:"clean"
+}
 ```
 
 Essentially `helm` is taking in the values.yaml in the k8/postgresql repo to make the postgresql cluster. The password is generated for us and the other make files use `kubectl` to get it for you.
@@ -255,6 +299,19 @@ followed by
 make
 ```
 
+## Sqitch
+
+This is the demo structure I created for PostgREST to serve up. You will need to run it before PostgREST can get access to the database (since it sets the access passwords and roles).
+
+Just run:
+
+```
+make setup
+make
+```
+
+The setup will forward a local port to the postgresql instance so Sqitch can access the database. I assume that you have done nothing more the instructions I have given. The Makefiles know how to both get the credentials and figure out the names of the pods.
+
 ## PostgREST
 
 This one has a few pain points. The reason I started using environment variables in the first place was so I could deploy different versions of PostgREST, but the result is quite clumsy. If you want to deploy say `v1` you set the `DBSCHEMA` environment variable to 'v1'. When you run `make` in the k8/PostgREST folder it will create a new deployment, service, ingress and url to access a PostgREST instance that access the schema v1. If you want to remove that version you run `make clean` and its all removed for you, but if you want to remove say version `v2` you have to switch the environment variable to `v2` before you can remove it.
@@ -266,6 +323,14 @@ There is another part to keep in mind: all instances use the same `JWT_SECRET`, 
 Note: the `AWS_HOST_ID` env uses `DOMAINNAME` to figure out which of the `hostedZones` is the right one. Just make sure the `DOMAINNAME` is only the domain. For example: gasworktesting **NOT** gasworktesting.com
 
 Note: The `ELB` env variable is filled with the first elastic load balancer it finds. I might be able to do something where I ask k8 what vpc the cluster is in and use that to filter the results, but for now just keep this is mind.
+
+### Pre-requisites
+
+The k8/PostgREST repo just has the deployment scrips, the PostgREST image itself you need to have on a docker registry where k8 can access it. I used the AWS's docker hub registry to host the image and GitLab-runner to build the image / upload the image. I have a separate repository that is a fork of PostgREST with my preliminary work for deploying the service, deployment images, build images and GitLab-runner's configuration. There is a Makefile that shows you how to upload the image from your local machine, but you have to build the docker image on linux for that to work. If you want to setup the GitLab-runner as I have, please see that section.
+
+Then you will need to update the `GIT_REVISION_POSTGREST` environment variable.
+
+In the PostgREST repo I have my fork that I built the PostgREST image with. Please see that repo for details on how to build the image.
 
 ### Summary of deployment commands
 
@@ -284,3 +349,106 @@ make clean
 To access go to [here](v1postgrest.gasworktesting.com) and you will get the swagger spec.
 
 ## Swagger-UI
+
+Very similar to the way PostgREST is setup. The version is also handled with DBSCHEMA env variable. So to deploy the version 1 of swagger-ui you just need to have set DBSCHEMA to v1. Then:
+
+```
+make
+```
+
+And to remove (while having the DBSCHEMA set to v1)
+
+```
+make clean
+```
+
+Then to access go [here](https://v1swagger-ui.gasworktesting.com/). If you also created version 2 then the swagger-ui would be [here](https://v2swagger-ui.gasworktesting.com/). 
+
+# GitLab-runner
+
+Here are my notes are setting up the GitLab-runner and other instructions I needed.
+
+* Launch a new machine on AWS w/ 4GB RAM
+
+  - [ ] It should have the same zone as your repositories
+
+  - [ ] It should be an Ubuntu 16.04 LTS AMI
+
+* Update & Upgrade and use 4.8 Kernel (GHC problems otherwise)
+
+```
+apt-get update
+apt-get -y upgrade
+apt-get -y dist-upgrade
+apt-get -y install \
+        linux-signed-image-4.8.0-46-generic \
+        linux-image-extra-4.8.0-46-generic \
+        linux-headers-4.8.0-46-generic \
+        linux-tools-4.8.0-46-generic
+reboot
+```
+
+* Install stack
+
+```
+curl -sSL https://get.haskellstack.org/ | sh
+```
+
+* Install make (or just build-essential)
+
+```
+apt-get -y install build-essential
+```
+
+* Install the AWS CLI
+
+```
+apt-get -y install python-pip
+pip install --system awscli
+```
+
+* Install gitlab-runner
+  https://docs.gitlab.com/runner/install/linux-repository.html
+
+  - [ ] Install Docker
+    ```
+      curl -sSL https://get.docker.com/ | sh
+    ```
+
+  - [ ] Install gitlab runner
+    ```
+    curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh | bash
+    cat > /etc/apt/preferences.d/pin-gitlab-runner.pref <<EOF
+    Explanation: Prefer GitLab provided packages over the Debian native ones
+    Package: gitlab-ci-multi-runner
+    Pin: origin packages.gitlab.com
+    Pin-Priority: 1001
+    EOF
+    apt-get update
+    apt-get -y install gitlab-ci-multi-runner
+    usermod -a -G docker gitlab-runner
+    ```
+
+* Configure gitlab-runner
+
+  You'll need the url & token from the gitlab website (under Settings -> CI/CD
+  Pipelines). Choose the shell runner.
+  ```
+    gitlab-ci-multi-runner register
+    systemctl restart gitlab-runner
+  ```
+
+* Steps to secure the server
+
+  In the AWS security group set Http and Https inbound to only accept 
+  connections from gitlab (172.31.20.160/32). Then turn on ufw logging 
+  to get the ip address
+
+  I also restricted ssh to my ip adress
+
+  Note: there are enviroment variables that GitLab can set, lookinto
+  later.
+
+* Fixing: "Your Authorization Token has expired"
+
+  - run `aws configure` and give it the GitLab_Docker_Repo credentials

@@ -1,0 +1,75 @@
+######################################################
+######################## Gloabl ######################
+######################################################
+
+export DOMAINNAME=gasworktesting
+
+# Variables for sqitch and postgrest
+export AUTHENTICATOR_PASSWORD="<you password here>"
+
+######################################################
+###################### Postgresql ####################
+######################################################
+
+# Note, DBURI needs this to be set first
+#
+# Name of the Posgresql service
+export POSTGRES_SERVICE=my-release
+
+######################################################
+####################### PostgREST ####################
+######################################################
+
+# This is what postgresql instance PostgREST will access
+export DBURI=postgresql://authenticator:$AUTHENTICATOR_PASSWORD@$POSTGRES_SERVICE-postgresql:5432/postgres
+
+# JWT Secret generated with: openssl rand -base64 45
+export JWT_SECRET=<Your secret here>
+
+# Note to self, when you have more than one version having this as an env
+# variable seems like a bad idea.
+#
+# What version of the schema is this postgrest instances accessing
+export DBSCHEMA=v2
+
+# PostgREST git revision number. Used for working out what image to deploy
+export GIT_REVISION_POSTGREST=e6d3f45
+
+# The repo where the PostgREST images is
+export DOCKER_REPO=152838698206.dkr.ecr.ap-southeast-2.amazonaws.com
+
+######################################################
+######################## Sqitch ######################
+######################################################
+
+######################################################
+######################### Kops #######################
+######################################################
+
+# the name of where the cluster and its components are deployed on AWS
+export REGION=ap-southeast-2
+
+# name of the k8 cluster for kops
+export NAME=k8s-$REGION.$DOMAINNAME.com
+
+# The S3 bucket you created
+export KOPS_STATE_STORE=s3://$NAME
+
+# what is the zone within the REGION you want to deploy to
+export ZONES=ap-southeast-2c
+
+# the path to the public key that you uploaded to AWS
+export PUBLIC_KEY_PATH=~/.ssh/k8s-$REGION.pem.pub
+
+# Name of the S3 bucket on AWS
+export BUCKET=s3://k8s-$REGION.$DOMAINNAME
+
+######################################################
+######################### Kops #######################
+######################################################
+
+# Unfortunaly there is no way to ask the aws cli tool for the arn
+# of the certificate, so you just have to look it up yourself.
+#
+# ssl cert arn from AWS
+export SSL_CERT_ARN="arn:aws:acm:ap-southeast-2:152838698206:certificate/7786d3d7-c6c7-4e91-8711-b2a2c4412e4b"
