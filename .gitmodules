@@ -1,0 +1,24 @@
+[submodule "sqitch"]
+	path = sqitch/realworld
+	url = git@gitlab.com:Honors-project/sqitch.git
+[submodule "PostgREST repository"]
+	path = PostgREST
+	url = git@gitlab.com:Honors-project/PostgREST.git
+[submodule "angular-realworld-example-app"]
+	path = angular-realworld-example-app
+	url = git@gitlab.com:Honors-project/angular-realworld-example-app.git
+[submodule "swagger-ui"]
+	path = k8/swagger-ui
+	url = git@gitlab.com:Honors-project/k8/swagger-ui.git
+[submodule "postgresql"]
+	path = k8/postgresql
+	url = git@gitlab.com:Honors-project/k8/postgresql.git
+[submodule "ingress"]
+	path = k8/ingress
+	url = git@gitlab.com:Honors-project/k8/ingress.git
+[submodule "heapster"]
+	path = k8/heapster
+	url = git@gitlab.com:Honors-project/k8/heapster.git
+[submodule "PostgREST deployment"]
+	path = k8/PostgREST
+	url = git@gitlab.com:Honors-project/k8/PostgREST.git
