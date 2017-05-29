@@ -1,0 +1,553 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Demo V1",
+		"_postman_id": "c41914d6-dc25-2d3e-1240-92497142beed",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create user test2",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/new_user",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test2.com\",\n  \"pass\": \"test2\",\n  \"username\": \"test2\"\n}"
+				},
+				"description": "Create test2"
+			},
+			"response": []
+		},
+		{
+			"name": "Create user test3",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/new_user",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test3.com\",\n  \"pass\": \"test3\",\n  \"username\": \"test3\"\n}"
+				},
+				"description": "Create test2"
+			},
+			"response": []
+		},
+		{
+			"name": "Create user test4",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/new_user",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test4.com\",\n  \"pass\": \"test4\",\n  \"username\": \"test4\"\n}"
+				},
+				"description": "Create test2"
+			},
+			"response": []
+		},
+		{
+			"name": "login as test2",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test2.com\",\n  \"pass\": \"test2\"\n}"
+				},
+				"description": "login as user"
+			},
+			"response": []
+		},
+		{
+			"name": "login as test3",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test3.com\",\n  \"pass\": \"test3\"\n}"
+				},
+				"description": "login as user"
+			},
+			"response": []
+		},
+		{
+			"name": "login as test4",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/rpc/login",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test@test4.com\",\n  \"pass\": \"test4\"\n}"
+				},
+				"description": "login as user"
+			},
+			"response": []
+		},
+		{
+			"name": "Show Profiles that were generated",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"following\": [\"Bad Username\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Modify test2's profile's bio without authentication",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bio\": \"my bio\"\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Modify test2's profile's bio",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test2_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bio\": \"my bio\"\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Show profiles with bio change",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"following\": [\"Bad Username\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Create two articles about Dragons",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{test2_token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n\t{\n\t\t\"slug\": \"Dragons\",\n\t\t\"title\": \"How to trail your Dragon\",\n\t\t\"description\": \"Its really hard\",\n\t\t\"body\": \"Very carefully\",\n\t\t\"taglist\": [\"Dragons\", \"hard\"]\n\t},\n\t{\n\t\t\"slug\": \"Dragons2\",\n\t\t\"title\": \"How to train your Dragon2\",\n\t\t\"description\": \"Its really hard\",\n\t\t\"body\": \"Very very carefully\",\n\t    \"taglist\": []\n\t}\n]"
+				},
+				"description": "Post an Article"
+			},
+			"response": []
+		},
+		{
+			"name": "Show new articles about Dragons",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "Update title field for Dragons article",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles?slug=eq.Dragons",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{test2_token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"How to train your Dragon\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Show field change for Dragons article",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "Post article as test3",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"slug\": \"Presentation\",\n\t\"title\": \"Presentations are hard\",\n\t\"description\": \"How to present code\",\n\t\"body\": \"Don't\"\n}"
+				},
+				"description": "Post an Article"
+			},
+			"response": []
+		},
+		{
+			"name": "Show all articles with the new presentation article",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles?select=*,profiles{*}",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "test3 Favorite an article that does not exist",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"favorited\": [\"Dragons2\", \"Dragons\", \"New Article\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "test3 Favorite twice",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"favorited\": [\"Dragons2\", \"Dragons\", \"Dragons\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "test3 Favorite Dragons and Dragons2",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"favorited\": [\"Dragons2\", \"Dragons\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Show test3 profile's favorites",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles?username=eq.test3&select=favorited",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"following\": [\"Bad Username\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all articles no jwt",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles?select=slug,favoritescount,favorited",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all articles logged in as test3",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles?select=slug,favoritescount,favorited",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "Test2 change all descriptions to \"Just Dragons\"",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test2_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"description\": \"Just Dragons\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Show descriptions change",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Get all articles"
+			},
+			"response": []
+		},
+		{
+			"name": "Cannot change author",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/articles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"author\": \"test2\"\n}"
+				},
+				"description": "Post an Article"
+			},
+			"response": []
+		},
+		{
+			"name": "test3 following test2 and test3",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "{{test3_token}}",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"following\": [\"test2\", \"test4\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		},
+		{
+			"name": "Profiles leak too much information",
+			"request": {
+				"url": "https://v1postgrest.gasworktesting.com/profiles",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"following\": [\"Bad Username\"]\n}"
+				},
+				"description": "get profiles"
+			},
+			"response": []
+		}
+	]
+}
