@@ -1,10 +1,14 @@
----
-title: Instructions on how to deploy entire setup
-author: Pfalzgraf
-date: 
-toc:
-geometry: margin=1in
----
+# What is This?
+
+Crudely put this is a proof of concept that shows you can have a restful API generated from just the structure of your data and the constraints on that data. The result is quite remarkable and I highly recommend you take a look at my Thesis, data-structure-generate.pdf, for more details. Note: for the proof of concept I describe the structure and constants of my data in SQL, but in principle you could do the same in UML or any other more user friendly language.
+
+# Why did I create this for my Honor's Thesis?
+
+Web API's seem to trying to solve the same problem over and over again: structured access to data where people only have access to what they should. Instead of spending your time on implementing your API, you should focus on what you want your API to look like for the end users. This is what my proof of concepts shows is possible.
+
+# Structure of this document
+
+The rest of this document is on how to setup this on AWS. I do NOT expect this to work out of the box, nor should you attempt to replicate my results without intimate knowledge of using kubernetes on AWS and be comfortable building haskell projects. I Somewhat purposefully have not linked in the rest of the required repositories for this simply because this project is not in a state others can contribute to. However, the ideas themselves are quite valuable and the challenges I dealt with would be of interest to others. I would recommend instead that you instead read my Thesis, data-structure-generate.pdf.
 
 # General Structure
 
